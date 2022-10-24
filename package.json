@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "argon2": "^0.30.1",
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "joi": "^17.6.3",
