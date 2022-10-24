@@ -1,5 +1,6 @@
 const database = require("./database");
 
+
 const getUsers = (req, res) => {
   let sql = "select firstname, lastname, email, city, language from users ";
 
@@ -9,12 +10,10 @@ const getUsers = (req, res) => {
     sql += " where city = ? and language = ?";
     sqlValues.push(req.query.city);
     sqlValues.push(req.query.language);
-  } 
-  else if (req.query.language != null) {
+  } else if (req.query.language != null) {
     sql += " where language = ?";
     sqlValues.push(req.query.language);
-  } 
-  else if (req.query.city != null) {
+  } else if (req.query.city != null) {
     sql += " where city = ?";
     sqlValues.push(req.query.city);
   }
@@ -32,9 +31,11 @@ const getUsers = (req, res) => {
 
 const getUserById = (req, res) => {
   const id = parseInt(req.params.id);
-
   database
-    .query("select id, firstname, lastname, email, city, language from users where id = ?", [id])
+    .query(
+      "select id, firstname, lastname, email, city, language from users where id = ?",
+      [id]
+    )
     .then(([users]) => {
       if (users[0] != null) {
         res.json(users[0]);
@@ -48,9 +49,29 @@ const getUserById = (req, res) => {
     });
 };
 
+const getUserByEmail = (req, res, next) => {
+  const { email } = req.body;
+  console.log(email);
+  database
+    .query("select * from users where email = ?", [email])
+    .then(([users]) => {
+      if (users[0] != null) {
+        req.user = users[0];
+        next();
+      } else {
+        res.status(404).send("Not Found");
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Error retrieving data from database");
+    });
+};
+
 const postUser = (req, res) => {
-  const { firstname, lastname, email, city, language, hashedPassword } = req.body;
-console.log(hashedPassword);
+  const { firstname, lastname, email, city, language, hashedPassword } =
+    req.body;
+  console.log(hashedPassword);
   database
     .query(
       "INSERT INTO users(firstname, lastname, email, city, language, hashedPassword) VALUES (?, ?, ?, ?, ?, ?)",
@@ -112,4 +133,5 @@ module.exports = {
   postUser,
   updateUser,
   deleteUser,
+  getUserByEmail,
 };
